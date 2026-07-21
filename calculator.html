@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ENG Calc</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+
+:root{
+  --body:#1b1f2e;
+  --shell:#222638;
+  --shell2:#191d2b;
+  --bezel:#2d3248;
+  --screen-bg:#c8d4b0;
+  --screen-text:#1a2010;
+  --screen-dim:#5a6840;
+  --screen-cur:#1a2010;
+  --key-bg:#2a2f45;
+  --key-top:#353b55;
+  --key-shadow:#14172a;
+  --shift-col:#f5a623;
+  --alpha-col:#4fc3f7;
+  --op-col:#e0e0e0;
+  --digit-col:#ffffff;
+  --eq-col:#ffffff;
+  --eq-bg:#e05a2b;
+  --fn-top:#f5a623;
+  --fn2-top:#4fc3f7;
+  --accent:#f5a623;
+}
+
+body{
+  background:linear-gradient(160deg,#10131f 0%,#1b1f2e 100%);
+  min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;
+  padding:12px 8px;
+}
+
+.device{
+  width:100%;max-width:360px;
+  background:var(--shell);
+  border-radius:18px 18px 24px 24px;
+  padding:14px 12px 18px;
+  box-shadow:0 30px 80px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.07);
+  border:1px solid var(--bezel);
+}
+
+/* ── Brand bar ── */
+.brand{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 4px 10px;
+}
+.brand-name{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:700;letter-spacing:2px;
+  color:#8890b0;
+}
+.brand-model{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:300;
+  color:#555d80;letter-spacing:1px;
+}
+.mode-indicators{
+  display:flex;gap:6px;
+}
+.mode-pill{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;font-weight:700;letter-spacing:.5px;
+  padding:2px 6px;border-radius:20px;
+  background:#1e2236;color:#555d80;
+  border:1px solid #2a2f45;
+  cursor:pointer;transition:all .15s;
+  user-select:none;
+}
+.mode-pill.on-shift{background:rgba(245,166,35,.15);color:var(--shift-col);border-color:rgba(245,166,35,.4);}
+.mode-pill.on-alpha{background:rgba(79,195,247,.15);color:var(--alpha-col);border-color:rgba(79,195,247,.4);}
+.mode-pill.on-deg{background:rgba(100,200,120,.15);color:#64c878;border-color:rgba(100,200,120,.4);}
+.mode-pill.on-rad{background:rgba(200,120,255,.15);color:#c878ff;border-color:rgba(200,120,255,.4);}
+
+/* ── Screen ── */
+.screen-wrap{
+  background:var(--screen-bg);
+  border-radius:8px;
+  margin-bottom:14px;
+  padding:10px 12px 8px;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.06);
+  position:relative;
+  min-height:100px;
+  border:2px solid #151820;
+}
+.screen-mode-bar{
+  display:flex;gap:8px;
+  margin-bottom:4px;
+}
+.scr-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;font-weight:700;
+  color:var(--screen-dim);
+  letter-spacing:.5px;
+  opacity:0;transition:opacity .1s;
+}
+.scr-tag.vis{opacity:1;}
+
+.screen-expr{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  color:var(--screen-dim);
+  min-height:18px;
+  letter-spacing:.3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  direction:ltr;
+  margin-bottom:2px;
+}
+.screen-main{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:400;
+  font-size:36px;
+  color:var(--screen-text);
+  direction:ltr;
+  text-align:right;
+  line-height:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  transition:font-size .1s;
+  letter-spacing:-.5px;
+}
+.screen-main.sm{font-size:26px;}
+.screen-main.xs{font-size:19px;}
+
+.cursor{
+  display:inline-block;
+  width:2px;height:1em;
+  background:var(--screen-text);
+  vertical-align:middle;
+  animation:blink .9s step-end infinite;
+  margin-left:2px;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.screen-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--screen-dim);
+  text-align:right;
+  min-height:15px;
+  letter-spacing:.3px;
+  direction:ltr;
+}
+
+/* ── Key layout ── */
+.keys{display:flex;flex-direction:column;gap:6px;}
+
+.key-row{
+  display:grid;
+  gap:5px;
+}
+.row-5{grid-template-columns:repeat(5,1fr);}
+.row-4{grid-template-columns:repeat(4,1fr);}
+
+/* base key */
+.k{
+  position:relative;
+  border:none;cursor:pointer;
+  border-radius:6px;
+  height:44px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:1px;
+  background:var(--key-bg);
+  box-shadow:0 3px 0 var(--key-shadow);
+  transition:transform .07s,box-shadow .07s,filter .1s;
+  user-select:none;
+  padding:2px 2px 0;
+  overflow:hidden;
+}
+.k:active{transform:translateY(2px);box-shadow:0 1px 0 var(--key-shadow);}
+
+/* top labels (SHIFT / ALPHA) */
+.k-top{
+  display:flex;width:100%;justify-content:space-between;
+  padding:0 4px;
+  min-height:11px;
+}
+.k-s,.k-a{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;font-weight:700;
+  line-height:1;
+  letter-spacing:.3px;
+}
+.k-s{color:var(--shift-col);}
+.k-a{color:var(--alpha-col);}
+
+/* main label */
+.k-lbl{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:500;
+  color:var(--op-col);
+  line-height:1;
+  letter-spacing:-.3px;
+}
+/* sub label */
+.k-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;
+  color:#6068a0;
+  line-height:1;
+}
+
+/* specialised key colours */
+.k-digit .k-lbl{font-size:16px;font-weight:600;color:var(--digit-col);}
+.k-eq{background:#c04820;box-shadow:0 3px 0 #8a2e10;}
+.k-eq .k-lbl{color:#fff;font-size:16px;font-weight:700;}
+.k-shift{background:#2c2a1a;}
+.k-shift .k-lbl{color:var(--shift-col);font-weight:700;font-size:11px;}
+.k-alpha{background:#1a2530;}
+.k-alpha .k-lbl{color:var(--alpha-col);font-weight:700;font-size:11px;}
+.k-op .k-lbl{color:#e8b060;font-size:15px;}
+.k-mode .k-lbl{color:#8890b0;font-size:10px;font-weight:600;}
+.k-nav .k-lbl{font-size:18px;color:#9098c0;}
+
+/* SHIFT active tint */
+body.shift-on .k:not(.k-shift):not(.k-alpha) .k-s{color:#f5a623;opacity:1;}
+body.alpha-on .k:not(.k-shift):not(.k-alpha) .k-a{color:#4fc3f7;opacity:1;}
+
+/* Divider */
+.key-divider{height:1px;background:rgba(255,255,255,.04);margin:2px 0;}
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <!-- Brand -->
+  <div class="brand">
+    <div>
+      <div class="brand-name">SCIENTIFIC</div>
+      <div class="brand-model">fx-999 EX  ·  Natural-V.P.A.M.</div>
+    </div>
+    <div class="mode-indicators">
+      <div class="mode-pill" id="pillShift">SHIFT</div>
+      <div class="mode-pill" id="pillAlpha">ALPHA</div>
+      <div class="mode-pill on-deg" id="pillAngle">DEG</div>
+    </div>
+  </div>
+
+  <!-- Screen -->
+  <div class="screen-wrap">
+    <div class="screen-mode-bar">
+      <span class="scr-tag" id="tagComp">COMP</span>
+      <span class="scr-tag" id="tagStat">STAT</span>
+      <span class="scr-tag" id="tagFix">FIX</span>
+      <span class="scr-tag" id="tagSci">SCI</span>
+      <span class="scr-tag vis" id="tagMath">Math</span>
+    </div>
+    <div class="screen-expr" id="sExpr"></div>
+    <div class="screen-main" id="sMain">0<span class="cursor"></span></div>
+    <div class="screen-sub"  id="sSub"></div>
+  </div>
+
+  <!-- KEYS -->
+  <div class="keys">
+
+    <!-- Row 1: mode / setup / tool keys -->
+    <div class="key-row row-5">
+      <button class="k k-mode" onclick="k_mode()">
+        <div class="k-top"><span class="k-s"></span><span class="k-a"></span></div>
+        <div class="k-lbl">MODE</div></button>
+      <button class="k k-mode" onclick="k_setup()">
+        <div class="k-top"><span class="k-s">SETUP</span><span class="k-a"></span></div>
+        <div class="k-lbl">ON</div></button>
+      <button class="k k-mode" onclick="k_calcMode('stat')">
+        <div class="k-top"><span class="k-s">STAT</span><span class="k-a">CMPLX</span></div>
+        <div class="k-lbl">CALC</div></button>
+      <button class="k k-mode" onclick="k_format()">
+        <div class="k-top"><span class="k-s">∫dx</span><span class="k-a">SOLVE</span></div>
+        <div class="k-lbl">∫</div></button>
+      <button class="k k-mode" onclick="k_format2()">
+        <div class="k-top"><span class="k-s">Σ</span><span class="k-a">LOGIC</span></div>
+        <div class="k-lbl">d/dx</div></button>
+    </div>
+
+    <!-- Row 2: shift / alpha / nav -->
+    <div class="key-row row-5">
+      <button class="k k-shift" onclick="toggleShift()" id="btnShift">
+        <div class="k-top"></div>
+        <div class="k-lbl">SHIFT</div></button>
+      <button class="k k-alpha" onclick="toggleAlpha()" id="btnAlpha">
+        <div class="k-top"><span class="k-s">LOCK</span></div>
+        <div class="k-lbl">ALPHA</div></button>
+      <button class="k k-nav" onclick="k_arrow('left')">
+        <div class="k-top"><span class="k-s">INS</span><span class="k-a"></span></div>
+        <div class="k-lbl">◀</div></button>
+      <button class="k k-nav" onclick="k_arrow('up')">
+        <div class="k-top"><span class="k-s">REPLAY</span></div>
+        <div class="k-lbl">▲</div></button>
+      <button class="k k-nav" onclick="k_arrow('right')">
+        <div class="k-top"><span class="k-s">DEL</span><span class="k-a"></span></div>
+        <div class="k-lbl">▶</div></button>
+    </div>
+
+    <div class="key-row row-5">
+      <button class="k" onclick="k_fn('x⁻¹')">
+        <div class="k-top"><span class="k-s">x!</span><span class="k-a">Abs</span></div>
+        <div class="k-lbl">x⁻¹</div></button>
+      <button class="k" onclick="k_fn('√')">
+        <div class="k-top"><span class="k-s">∛</span><span class="k-a">ˣ√</span></div>
+        <div class="k-lbl">√</div></button>
+      <button class="k" onclick="k_fn('x²')">
+        <div class="k-top"><span class="k-s">log□</span><span class="k-a">10ˣ</span></div>
+        <div class="k-lbl">x²</div></button>
+      <button class="k" onclick="k_fn('^')">
+        <div class="k-top"><span class="k-s">eˣ</span><span class="k-a">ln</span></div>
+        <div class="k-lbl">^</div></button>
+      <button class="k k-nav" onclick="k_del()">
+        <div class="k-top"><span class="k-s">CLR</span></div>
+        <div class="k-lbl">DEL</div></button>
+    </div>
+
+    <div class="key-divider"></div>
+
+    <!-- Row trig -->
+    <div class="key-row row-5">
+      <button class="k" onclick="k_fn('sin')">
+        <div class="k-top"><span class="k-s">sin⁻¹</span><span class="k-a">sinh</span></div>
+        <div class="k-lbl">sin</div></button>
+      <button class="k" onclick="k_fn('cos')">
+        <div class="k-top"><span class="k-s">cos⁻¹</span><span class="k-a">cosh</span></div>
+        <div class="k-lbl">cos</div></button>
+      <button class="k" onclick="k_fn('tan')">
+        <div class="k-top"><span class="k-s">tan⁻¹</span><span class="k-a">tanh</span></div>
+        <div class="k-lbl">tan</div></button>
+      <button class="k" onclick="k_fn('log')">
+        <div class="k-top"><span class="k-s">10ˣ</span><span class="k-a">log□</span></div>
+        <div class="k-lbl">log</div></button>
+      <button class="k" onclick="k_fn('ln')">
+        <div class="k-top"><span class="k-s">eˣ</span><span class="k-a">e</span></div>
+        <div class="k-lbl">ln</div></button>
+    </div>
+
+    <!-- Row hyp / consts -->
+    <div class="key-row row-5">
+      <button class="k" onclick="k_fn('hyp')">
+        <div class="k-top"><span class="k-s">FRAC</span><span class="k-a"></span></div>
+        <div class="k-lbl">HYP</div></button>
+      <button class="k" onclick="k_fn('abs')">
+        <div class="k-top"><span class="k-s">→POL</span><span class="k-a">→REC</span></div>
+        <div class="k-lbl">|x|</div></button>
+      <button class="k" onclick="k_fn('π')">
+        <div class="k-top"><span class="k-s">e</span><span class="k-a"></span></div>
+        <div class="k-lbl">π</div></button>
+      <button class="k" onclick="k_fn('ENG')">
+        <div class="k-top"><span class="k-s">ENG</span><span class="k-a"></span></div>
+        <div class="k-lbl">←ENG</div></button>
+      <button class="k" onclick="k_fn('nPr')">
+        <div class="k-top"><span class="k-s">nPr</span><span class="k-a">nCr</span></div>
+        <div class="k-lbl">P(n,r)</div></button>
+    </div>
+
+    <!-- Row STO / RCL / stats -->
+    <div class="key-row row-5">
+      <button class="k" onclick="k_sto()">
+        <div class="k-top"><span class="k-s">CLR</span><span class="k-a"></span></div>
+        <div class="k-lbl">STO</div></button>
+      <button class="k" onclick="k_rcl()">
+        <div class="k-top"><span class="k-s">RCL</span><span class="k-a"></span></div>
+        <div class="k-lbl">RCL</div></button>
+      <button class="k" onclick="k_fn('Σ+')">
+        <div class="k-top"><span class="k-s">Σ-</span><span class="k-a">Σ</span></div>
+        <div class="k-lbl">Σ+</div></button>
+      <button class="k" onclick="k_fn('gcd')">
+        <div class="k-top"><span class="k-s">LCM</span><span class="k-a"></span></div>
+        <div class="k-lbl">GCD</div></button>
+      <button class="k" onclick="k_fn('int')">
+        <div class="k-top"><span class="k-s">Int÷</span><span class="k-a">Rmdr</span></div>
+        <div class="k-lbl">INT</div></button>
+    </div>
+
+    <div class="key-divider"></div>
+
+    <!-- Digit block + ops -->
+    <div class="key-row row-5">
+      <button class="k k-digit" onclick="k_num('7')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">x</span></div>
+        <div class="k-lbl">7</div></button>
+      <button class="k k-digit" onclick="k_num('8')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">y</span></div>
+        <div class="k-lbl">8</div></button>
+      <button class="k k-digit" onclick="k_num('9')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">z</span></div>
+        <div class="k-lbl">9</div></button>
+      <button class="k k-op" onclick="k_op('DEL')">
+        <div class="k-top"><span class="k-s">AC</span></div>
+        <div class="k-lbl">DEL</div></button>
+      <button class="k k-op" onclick="k_op('AC')">
+        <div class="k-top"><span class="k-s"></span></div>
+        <div class="k-lbl">AC</div></button>
+    </div>
+
+    <div class="key-row row-5">
+      <button class="k k-digit" onclick="k_num('4')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">A</span></div>
+        <div class="k-lbl">4</div></button>
+      <button class="k k-digit" onclick="k_num('5')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">B</span></div>
+        <div class="k-lbl">5</div></button>
+      <button class="k k-digit" onclick="k_num('6')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">C</span></div>
+        <div class="k-lbl">6</div></button>
+      <button class="k k-op" onclick="k_op('×')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">D</span></div>
+        <div class="k-lbl">×</div></button>
+      <button class="k k-op" onclick="k_op('÷')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">E</span></div>
+        <div class="k-lbl">÷</div></button>
+    </div>
+
+    <div class="key-row row-5">
+      <button class="k k-digit" onclick="k_num('1')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">F</span></div>
+        <div class="k-lbl">1</div></button>
+      <button class="k k-digit" onclick="k_num('2')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">G</span></div>
+        <div class="k-lbl">2</div></button>
+      <button class="k k-digit" onclick="k_num('3')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">H</span></div>
+        <div class="k-lbl">3</div></button>
+      <button class="k k-op" onclick="k_op('+')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">I</span></div>
+        <div class="k-lbl">+</div></button>
+      <button class="k k-op" onclick="k_op('−')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">J</span></div>
+        <div class="k-lbl">−</div></button>
+    </div>
+
+    <div class="key-row row-5">
+      <button class="k k-digit" onclick="k_num('0')">
+        <div class="k-top"><span class="k-s"></span><span class="k-a">:</span></div>
+        <div class="k-lbl">0</div></button>
+      <button class="k k-digit" onclick="k_dot()">
+        <div class="k-top"><span class="k-s">Ran#</span><span class="k-a">r</span></div>
+        <div class="k-lbl">.</div></button>
+      <button class="k k-digit" onclick="k_exp()">
+        <div class="k-top"><span class="k-s">π</span><span class="k-a">e</span></div>
+        <div class="k-lbl">×10ˣ</div><div class="k-sub">EXP</div></button>
+      <button class="k k-op" onclick="k_fn('Ans')">
+        <div class="k-top"><span class="k-s">DRG▸</span><span class="k-a">←</span></div>
+        <div class="k-lbl">Ans</div></button>
+      <button class="k k-eq" onclick="k_eq()">
+        <div class="k-top"><span class="k-s">=</span></div>
+        <div class="k-lbl">=</div></button>
+    </div>
+
+    <!-- extra row: brackets / fractions / conversions -->
+    <div class="key-row row-5">
+      <button class="k" onclick="k_bracket('(')">
+        <div class="k-top"><span class="k-s">[</span><span class="k-a">{</span></div>
+        <div class="k-lbl">(</div></button>
+      <button class="k" onclick="k_bracket(')')">
+        <div class="k-top"><span class="k-s">]</span><span class="k-a">}</span></div>
+        <div class="k-lbl">)</div></button>
+      <button class="k" onclick="k_fn('S⇔D')">
+        <div class="k-top"><span class="k-s">a b/c</span></div>
+        <div class="k-lbl">S⇔D</div></button>
+      <button class="k" onclick="k_fn('M+')">
+        <div class="k-top"><span class="k-s">M-</span><span class="k-a">M</span></div>
+        <div class="k-lbl">M+</div></button>
+      <button class="k" onclick="k_fn('±')">
+        <div class="k-top"><span class="k-s"></span></div>
+        <div class="k-lbl">±</div></button>
+    </div>
+
+  </div><!-- /keys -->
+</div><!-- /device -->
+
+<script>
+// ────────────────────────────────────────────────────────────
+//  State
+// ────────────────────────────────────────────────────────────
+const S = {
+  buf:     '',
+  expr:    '',
+  ans:     0,
+  mem:     {A:0,B:0,C:0,D:0,E:0,F:0,M:0},
+  shift:   false,
+  alpha:   false,
+  angleMode:'deg',
+  fixMode:  null,
+  hypNext:  false,
+  justEval: false,
+  openP:    0,
+  cursorPos: -1,
+  history:  [],
+  histIdx:  -1,
+  pendingOp:  null,
+  pendingVal: null,
+  stoNext:   false,
+  rclNext:   false,
+  statData:  [],
+};
+
+// ────────────────────────────────────────────────────────────
+//  Display helpers
+// ────────────────────────────────────────────────────────────
+function render(){
+  const m = document.getElementById('sMain');
+  const txt = S.buf === '' ? '0' : S.buf;
+  const len = txt.length;
+  m.className = 'screen-main' + (len>16?' xs':len>10?' sm':'');
+  m.innerHTML = escHtml(txt) + '<span class="cursor"></span>';
+  document.getElementById('sExpr').textContent = S.expr;
+  document.getElementById('sSub').textContent  = S.justEval ? ('Ans = '+fmtNum(S.ans)) : '';
+
+  const ps = document.getElementById('pillShift');
+  const pa = document.getElementById('pillAlpha');
+  ps.className = 'mode-pill' + (S.shift ? ' on-shift':'');
+  pa.className = 'mode-pill' + (S.alpha ? ' on-alpha':'');
+
+  document.getElementById('pillAngle').textContent = S.angleMode.toUpperCase();
+  document.getElementById('pillAngle').className   = 'mode-pill on-' + S.angleMode;
+
+  document.body.classList.toggle('shift-on', S.shift);
+  document.body.classList.toggle('alpha-on', S.alpha);
+
+  document.getElementById('tagMath').className = 'scr-tag vis';
+  document.getElementById('tagComp').className = 'scr-tag vis';
+}
+
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function fmtNum(n){
+  if(!isFinite(n)) return isNaN(n)?'Math ERROR':'Math ERROR';
+  if(S.fixMode !== null) return n.toFixed(S.fixMode);
+  if(Number.isInteger(n) && Math.abs(n)<1e15) return String(n);
+  const s = parseFloat(n.toPrecision(10));
+  if(Math.abs(s)>=1e10||( Math.abs(s)<1e-4 && s!==0)) return n.toExponential(6);
+  return String(s);
+}
+
+// ────────────────────────────────────────────────────────────
+//  Angle conversion
+// ────────────────────────────────────────────────────────────
+function toRad(v){
+  if(S.angleMode==='deg') return v*Math.PI/180;
+  if(S.angleMode==='grad') return v*Math.PI/200;
+  return v;
+}
+function fromRad(v){
+  if(S.angleMode==='deg') return v*180/Math.PI;
+  if(S.angleMode==='grad') return v*200/Math.PI;
+  return v;
+}
+
+// ────────────────────────────────────────────────────────────
+//  Input: digits / dot / EXP
+// ────────────────────────────────────────────────────────────
+function k_num(d){
+  // اگر STO یا RCL فعال باشه
+  if (S.stoNext) {
+    const varName = String.fromCharCode(64 + parseInt(d));
+    if (varName >= 'A' && varName <= 'F') {
+      S.mem[varName] = curVal();
+      S.stoNext = false;
+      toast(`STO → ${varName} = ${fmtNum(S.mem[varName])}`);
+      render();
+      return;
+    }
+  }
+  if (S.rclNext) {
+    const varName = String.fromCharCode(64 + parseInt(d));
+    if (varName >= 'A' && varName <= 'F') {
+      S.buf = fmtNum(S.mem[varName] || 0);
+      S.rclNext = false;
+      render();
+      return;
+    }
+  }
+
+  clearModifiers();
+  if(S.justEval){ S.buf=''; S.expr=''; S.justEval=false; }
+  if(S.buf==='0') S.buf=d;
+  else if(S.buf.length<20) S.buf+=d;
+  render();
+}
+
+function k_dot(){
+  clearModifiers();
+  if(S.justEval){ S.buf='0.'; S.expr=''; S.justEval=false; render(); return; }
+  if(!S.buf.includes('.')) S.buf += S.buf===''?'0.':'.';
+  render();
+}
+
+function k_exp(){
+  clearModifiers();
+  if(S.shift){ applyConst(Math.PI,'π'); return; }
+  if(S.alpha){ applyConst(Math.E,'e');  return; }
+  if(S.buf===''||S.buf==='0') S.buf='1';
+  if(!S.buf.includes('E') && !S.buf.includes('e')) S.buf+='E';
+  render();
+}
+
+function applyConst(val,label){
+  if(S.justEval){ S.buf=''; S.justEval=false; }
+  S.buf = fmtNum(val);
+  S.expr = label;
+  render();
+}
+
+// ────────────────────────────────────────────────────────────
+//  Operators (اصلاح‌شده)
+// ────────────────────────────────────────────────────────────
+function k_op(op) {
+  if (op === 'DEL') { k_del(); return; }
+  if (op === 'AC') { k_ac(); return; }
+  
+  clearModifiers();
+  
+  // اگر justEval هست، مقدار Ans رو به عنوان عدد اول در نظر بگیر
+  if (S.justEval) {
+    S.pendingVal = S.ans;
+    S.pendingOp = op;
+    S.expr = fmtNum(S.ans) + ' ' + op;
+    S.buf = '';
+    S.justEval = false;
+    render();
+    return;
+  }
+  
+  const v = curVal();
+  
+  // زنجیره‌ای: اگر عملگر pending داریم و عددی در بافر هست
+  if (S.pendingOp !== null && S.buf !== '') {
+    const r = compute(S.pendingVal, v, S.pendingOp);
+    if (!isFinite(r)) {
+      S.buf = 'Math ERROR';
+      S.pendingOp = null;
+      S.pendingVal = null;
+      render();
+      return;
+    }
+    S.ans = r;
+    S.pendingVal = r;
+    S.expr = fmtNum(r) + ' ' + op;
+    S.buf = '';
+    S.pendingOp = op;
+    render();
+    return;
+  }
+  
+  // عملگر جدید
+  if (S.buf !== '' || S.ans !== undefined) {
+    S.pendingVal = S.buf !== '' ? v : S.ans;
+    S.pendingOp = op;
+    S.expr = fmtNum(S.pendingVal) + ' ' + op;
+    S.buf = '';
+  }
+  render();
+}
+
+function curVal(){
+  if(S.buf==='') return S.ans||0;
+  return parseFloat(S.buf.replace(/[Ee]/,'e'))||0;
+}
+
+// ────────────────────────────────────────────────────────────
+//  تابع compute (کامل)
+// ────────────────────────────────────────────────────────────
+function compute(a, b, op) {
+  switch (op) {
+    case '+': return a + b;
+    case '−': return a - b;
+    case '×': return a * b;
+    case '÷': return b === 0 ? NaN : a / b;
+    case '^': return Math.pow(a, b);
+    case 'mod': return a % b;
+    case 'nPr': return perm(a, b);
+    case 'nCr': return comb(a, b);
+    case 'gcd': return gcd(a, b);
+    case 'lcm': return lcm(a, b);
+    case 'intDiv': return Math.trunc(a / b);
+    case '^log': return Math.log(b) / Math.log(a);
+    default: return b;
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+//  تابع k_eq (اصلاح‌شده)
+// ────────────────────────────────────────────────────────────
+function k_eq() {
+  clearModifiers();
+  
+  // اگر عملگر pending داریم و عددی در بافر هست
+  if (S.pendingOp !== null && S.buf !== '') {
+    const a = S.pendingVal;
+    const b = curVal();
+    const op = S.pendingOp;
+    
+    let r = compute(a, b, op);
+    if (!isFinite(r)) {
+      S.buf = 'Math ERROR';
+      S.pendingOp = null;
+      S.pendingVal = null;
+      render();
+      return;
+    }
+    
+    const exprStr = fmtNum(a) + ' ' + op + ' ' + fmtNum(b) + ' =';
+    pushHistory(exprStr, fmtNum(r));
+    
+    S.expr = exprStr;
+    S.buf = fmtNum(r);
+    S.ans = r;
+    S.pendingOp = null;
+    S.pendingVal = null;
+    S.justEval = true;
+    render();
+    return;
+  }
+  
+  // اگر فقط یک عدد داریم
+  if (S.buf !== '') {
+    try {
+      const val = curVal();
+      S.ans = val;
+      S.expr = S.buf + ' =';
+      S.buf = fmtNum(val);
+      S.justEval = true;
+      render();
+    } catch (e) {
+      S.buf = 'Error';
+      render();
+    }
+    return;
+  }
+  
+  // اگر هیچی در بافر نیست، Ans رو نشون بده
+  if (S.ans !== undefined && S.ans !== 0) {
+    S.buf = fmtNum(S.ans);
+    S.justEval = true;
+    render();
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+//  Functions
+// ────────────────────────────────────────────────────────────
+function k_fn(name){
+  const sh = S.shift, al = S.alpha, hy = S.hypNext;
+  clearModifiers();
+
+  if(name==='hyp'){ S.hypNext=true; render(); return; }
+
+  if(sh){
+    const map={
+      'sin':'asin','cos':'acos','tan':'atan',
+      'log':'pow10','ln':'exp',
+      '√':'cbrt','x²':'logN','x⁻¹':'fact',
+      'abs':'pol','π':'e_const','nPr':'nCr',
+      'ENG':'engFwd','gcd':'lcm','int':'intDiv',
+      'S⇔D':'mixed','M+':'M-','Σ+':'Σ-',
+    };
+    name = map[name]||name;
+  }
+  if(al){
+    const amap={
+      'sin':'sinh','cos':'cosh','tan':'tanh',
+      'ln':'e_const','x²':'pow10',
+    };
+    name=amap[name]||name;
+  }
+  if(hy){
+    const hmap={sin:'sinh',cos:'cosh',tan:'tanh',
+                asin:'asinh',acos:'acosh',atan:'atanh'};
+    name=hmap[name]||name;
+  }
+
+  applyFn(name);
+  render();
+}
+
+function applyFn(name){
+  const v = curVal();
+  let r, lbl;
+  
+  // اگر STO یا RCL فعال باشه، متغیرها رو مدیریت کن
+  if (S.stoNext && name.length === 1 && name >= 'A' && name <= 'F') {
+    S.mem[name] = v;
+    S.stoNext = false;
+    toast(`STO → ${name} = ${fmtNum(S.mem[name])}`);
+    return;
+  }
+  if (S.rclNext && name.length === 1 && name >= 'A' && name <= 'F') {
+    S.buf = fmtNum(S.mem[name] || 0);
+    S.rclNext = false;
+    render();
+    return;
+  }
+  
+  switch(name){
+    case 'sin':  r=Math.sin(toRad(v));  lbl=`sin(${v})`; break;
+    case 'cos':  r=Math.cos(toRad(v));  lbl=`cos(${v})`; break;
+    case 'tan':  r=Math.tan(toRad(v));  lbl=`tan(${v})`; break;
+    case 'asin': r=fromRad(Math.asin(v)); lbl=`sin⁻¹(${v})`; break;
+    case 'acos': r=fromRad(Math.acos(v)); lbl=`cos⁻¹(${v})`; break;
+    case 'atan': r=fromRad(Math.atan(v)); lbl=`tan⁻¹(${v})`; break;
+    case 'sinh': r=Math.sinh(v); lbl=`sinh(${v})`; break;
+    case 'cosh': r=Math.cosh(v); lbl=`cosh(${v})`; break;
+    case 'tanh': r=Math.tanh(v); lbl=`tanh(${v})`; break;
+    case 'asinh':r=Math.asinh(v);lbl=`sinh⁻¹(${v})`; break;
+    case 'acosh':r=Math.acosh(v);lbl=`cosh⁻¹(${v})`; break;
+    case 'atanh':r=Math.atanh(v);lbl=`tanh⁻¹(${v})`; break;
+    case 'log':  r=Math.log10(v);lbl=`log(${v})`; break;
+    case 'ln':   r=Math.log(v);  lbl=`ln(${v})`; break;
+    case 'pow10':r=Math.pow(10,v);lbl=`10^(${v})`; break;
+    case 'exp':  r=Math.exp(v);  lbl=`e^(${v})`; break;
+    case 'logN': { S.pendingOp='^log'; S.pendingVal=v; S.buf=''; render(); return; }
+    case '√':    r=Math.sqrt(v); lbl=`√(${v})`; break;
+    case 'cbrt': r=Math.cbrt(v); lbl=`∛(${v})`; break;
+    case 'x²':   r=v*v;          lbl=`${v}²`; break;
+    case '^':    S.pendingOp='^'; S.pendingVal=v; S.buf=''; render(); return;
+    case 'x⁻¹': r=1/v;           lbl=`1/(${v})`; break;
+    case 'fact': r=factorial(Math.round(v)); lbl=`${v}!`; break;
+    case 'abs':  r=Math.abs(v);  lbl=`|${v}|`; break;
+    case 'π':    r=Math.PI;      lbl='π'; break;
+    case 'e_const':r=Math.E;     lbl='e'; break;
+    case 'ENG': case 'engFwd': { engShift(v,1);  return; }
+    case '←ENG':               { engShift(v,-1); return; }
+    case 'nPr': { S.pendingOp='nPr'; S.pendingVal=v; S.buf=''; render(); return; }
+    case 'nCr': { S.pendingOp='nCr'; S.pendingVal=v; S.buf=''; render(); return; }
+    case 'pol': { const y=v, x=S.pendingVal||0; r=Math.hypot(x,y); lbl=`Pol(${x},${y})`; break; }
+    case 'gcd':  S.pendingOp='gcd'; S.pendingVal=v; S.buf=''; render(); return;
+    case 'lcm':  S.pendingOp='lcm'; S.pendingVal=v; S.buf=''; render(); return;
+    case 'int':  r=Math.trunc(v); lbl=`Int(${v})`; break;
+    case 'intDiv':S.pendingOp='intDiv'; S.pendingVal=v; S.buf=''; render(); return;
+    case 'S⇔D': { const frac=decToFrac(v); S.expr=`${v} = ${frac}`; S.buf=fmtNum(v); render(); return; }
+    case 'mixed':{ S.expr=`Mixed frac: ${decToMixed(v)}`; render(); return; }
+    case 'Ans': r=S.ans; lbl='Ans'; break;
+    case 'M+':  S.mem.M+=v; toast(`M = ${fmtNum(S.mem.M)}`); render(); return;
+    case 'M-':  S.mem.M-=v; toast(`M = ${fmtNum(S.mem.M)}`); render(); return;
+    case 'Σ+':  pushStat(v); return;
+    case 'Σ-':  popStat();   return;
+    case '±':   S.buf=S.buf.startsWith('-')?S.buf.slice(1):'-'+S.buf; render(); return;
+    default: toast(name+' — coming soon'); return;
+  }
+
+  if(r===undefined) return;
+  if(!isFinite(r)){ S.buf='Math ERROR'; S.expr=lbl; S.justEval=true; render(); return; }
+  pushHistory(lbl, fmtNum(r));
+  S.expr=lbl+' ='; S.buf=fmtNum(r); S.ans=r; S.justEval=true;
+}
+
+// ────────────────────────────────────────────────────────────
+//  Math helpers
+// ────────────────────────────────────────────────────────────
+function factorial(n){
+  if(n<0||n>170) return Infinity;
+  if(n<=1) return 1;
+  let r=1; for(let i=2;i<=n;i++) r*=i; return r;
+}
+function gcd(a,b){a=Math.abs(Math.round(a));b=Math.abs(Math.round(b));while(b){let t=b;b=a%b;a=t;}return a;}
+function lcm(a,b){return Math.abs(Math.round(a)*Math.round(b))/gcd(a,b);}
+function perm(n,r){n=Math.round(n);r=Math.round(r);if(r<0||r>n)return 0;return factorial(n)/factorial(n-r);}
+function comb(n,r){n=Math.round(n);r=Math.round(r);if(r<0||r>n)return 0;return factorial(n)/(factorial(r)*factorial(n-r));}
+
+function engShift(v,dir){
+  if(!isFinite(v)||v===0) return;
+  const exp=Math.floor(Math.log10(Math.abs(v)));
+  const newExp=exp+dir*3;
+  const r=v*Math.pow(10,-newExp+exp)*Math.pow(10,newExp-exp);
+  S.buf=fmtNum(v); render();
+}
+
+function decToFrac(x){
+  const eps=1e-9,maxD=1000;
+  let best=[Math.round(x),1];
+  let h0=1,h1=0,k0=0,k1=1;
+  let a=Math.trunc(x);
+  let rem=x-a;
+  for(let i=0;i<30;i++){
+    if(Math.abs(rem)<eps) break;
+    rem=1/rem; a=Math.trunc(rem);
+    [h0,h1]=[a*h0+h1,h0];
+    [k0,k1]=[a*k0+k1,k0];
+    if(k0>maxD) break;
+    if(Math.abs(h0/k0-x)<eps){best=[h0,k0];break;}
+    best=[h0,k0];
+    rem=rem-a;
+  }
+  return `${best[0]}/${best[1]}`;
+}
+function decToMixed(x){
+  const sign=x<0?'-':'';x=Math.abs(x);
+  const w=Math.trunc(x),frac=decToFrac(x-w);
+  if(w===0) return sign+frac;
+  const parts=frac.split('/');
+  if(parseInt(parts[0])===0) return sign+w;
+  return `${sign}${w} ${frac}`;
+}
+
+// ────────────────────────────────────────────────────────────
+//  STAT helpers
+// ────────────────────────────────────────────────────────────
+function pushStat(v){S.statData.push(v);toast(`n=${S.statData.length} Σ+${v}`);render();}
+function popStat(){if(S.statData.length){const v=S.statData.pop();toast(`Removed ${v}`);}render();}
+
+// ────────────────────────────────────────────────────────────
+//  DEL / AC / bracket / STO / RCL
+// ────────────────────────────────────────────────────────────
+function k_del(){
+  clearModifiers();
+  if(S.buf.length>0) S.buf=S.buf.slice(0,-1);
+  if(S.buf==='') S.buf='0';
+  S.justEval=false;
+  render();
+}
+function k_ac(){
+  clearModifiers();
+  S.buf=''; S.expr=''; S.pendingOp=null; S.pendingVal=null;
+  S.justEval=false; S.openP=0; S.hypNext=false;
+  S.stoNext = false; S.rclNext = false;
+  render();
+}
+
+function k_bracket(b){
+  clearModifiers();
+  if(b==='('){S.openP++; S.buf+=b;}
+  else if(S.openP>0){S.openP--; S.buf+=b;}
+  render();
+}
+
+function k_sto(){ 
+  S.stoNext = true; 
+  S.rclNext = false;
+  toast('STO → tap a digit (1-6)'); 
+  render(); 
+}
+
+function k_rcl(){ 
+  S.rclNext = true; 
+  S.stoNext = false;
+  toast('RCL → tap a digit (1-6)'); 
+  render(); 
+}
+
+// ────────────────────────────────────────────────────────────
+//  SHIFT / ALPHA toggles
+// ────────────────────────────────────────────────────────────
+function toggleShift(){S.shift=!S.shift; if(S.shift)S.alpha=false; render();}
+function toggleAlpha(){S.alpha=!S.alpha; if(S.alpha)S.shift=false; render();}
+function clearModifiers(){ S.shift=false; S.alpha=false; }
+
+// ────────────────────────────────────────────────────────────
+//  MODE / SETUP
+// ────────────────────────────────────────────────────────────
+function k_mode(){
+  const modes=['deg','rad','grad'];
+  const i=(modes.indexOf(S.angleMode)+1)%3;
+  S.angleMode=modes[i];
+  toast('Angle: '+S.angleMode.toUpperCase());
+  render();
+}
+function k_setup(){ k_ac(); toast('Reset'); }
+function k_calcMode(m){ toast('Mode: '+m); }
+function k_format(){ toast('∫ (numerical integration)'); }
+function k_format2(){ toast('d/dx (numerical derivative)'); }
+
+// ────────────────────────────────────────────────────────────
+//  Arrow / replay
+// ────────────────────────────────────────────────────────────
+function k_arrow(dir){
+  if(dir==='up'||dir==='down'){
+    const d=dir==='up'?1:-1;
+    S.histIdx=Math.max(-1,Math.min(S.history.length-1,S.histIdx+d));
+    if(S.histIdx>=0){ 
+      S.buf=S.history[S.histIdx].val; 
+      S.expr=S.history[S.histIdx].expr; 
+    }
+    else { S.buf=''; S.expr=''; }
+    render();
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+//  History
+// ────────────────────────────────────────────────────────────
+function pushHistory(expr,val){
+  S.history.unshift({expr,val});
+  if(S.history.length>40) S.history.pop();
+  S.histIdx=-1;
+}
+
+// ────────────────────────────────────────────────────────────
+//  Toast
+// ────────────────────────────────────────────────────────────
+function toast(msg){
+  let t=document.querySelector('.toast-el');
+  if(!t){t=document.createElement('div');t.className='toast-el';document.body.appendChild(t);}
+  Object.assign(t.style,{
+    position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',
+    background:'rgba(30,35,55,.95)',color:'#e0e4f0',
+    border:'1px solid #3a4060',
+    borderRadius:'20px',padding:'7px 16px',
+    fontFamily:"'JetBrains Mono',monospace",fontSize:'12px',letterSpacing:'.3px',
+    zIndex:'9999',pointerEvents:'none',whiteSpace:'nowrap',
+    transition:'opacity .25s',opacity:'1',
+  });
+  t.textContent=msg;
+  clearTimeout(t._tmr);
+  t._tmr=setTimeout(()=>t.style.opacity='0',1800);
+}
+
+// ────────────────────────────────────────────────────────────
+//  Keyboard
+// ────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  const k=e.key;
+  if('0123456789'.includes(k)) k_num(k);
+  else if(k==='.') k_dot();
+  else if(k==='+') k_op('+');
+  else if(k==='-') k_op('−');
+  else if(k==='*') k_op('×');
+  else if(k==='/'){ e.preventDefault(); k_op('÷'); }
+  else if(k==='Enter'||k==='=') k_eq();
+  else if(k==='Backspace') k_del();
+  else if(k==='Escape') k_ac();
+  else if(k==='ArrowUp') k_arrow('up');
+  else if(k==='ArrowDown') k_arrow('down');
+  else if(k==='(') k_bracket('(');
+  else if(k===')') k_bracket(')');
+  else if(k==='^') k_fn('^');
+  else if(k==='s') k_fn('sin');
+  else if(k==='c') k_fn('cos');
+  else if(k==='t') k_fn('tan');
+  else if(k==='l') k_fn('log');
+  else if(k==='n') k_fn('ln');
+  else if(k==='r') k_fn('√');
+  else if(k==='p') applyConst(Math.PI,'π');
+  else if(k==='e'&&!e.ctrlKey) applyConst(Math.E,'e');
+});
+
+// ────────────────────────────────────────────────────────────
+//  Init
+// ────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
